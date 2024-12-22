@@ -1,0 +1,27 @@
+[
+  {
+    "instruction": "What is neural networks?",
+    "response": "Deep Learning is a specialized form of machine learning that uses neural networks with multiple layers. Neural Networks are computing systems inspired by biological neural networks in animal brains.",
+    "topic": "Neural Networks"
+  },
+  {
+    "instruction": "What is learning is?",
+    "response": "\n    Machine Learning is a subset of artificial intelligence that enables systems to learn and improve from experience. Deep Learning is a specialized form of machine learning that uses neural networks with multiple layers.",
+    "topic": "Learning is"
+  },
+  {
+    "instruction": "Elaborate on deep learning",
+    "response": "Deep Learning is a specialized form of machine learning that uses neural networks with multiple layers.",
+    "topic": "Deep Learning"
+  },
+  {
+    "instruction": "What is machine learning?",
+    "response": "\n    Machine Learning is a subset of artificial intelligence that enables systems to learn and improve from experience. Deep Learning is a specialized form of machine learning that uses neural networks with multiple layers.",
+    "topic": "Machine Learning"
+  },
+  {
+    "instruction": "Can you describe how networks are works?",
+    "response": "Neural Networks are computing systems inspired by biological neural networks in animal brains.",
+    "topic": "Networks are"
+  }
+]
