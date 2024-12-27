@@ -84,9 +84,10 @@ target/
 profile_default/
 ipython_config.py
 
-# temp text files
+# temp text files and jsonl files
 *.txt
 *.text
+file.jsonl
 
 # pdf files
 *.pdf
