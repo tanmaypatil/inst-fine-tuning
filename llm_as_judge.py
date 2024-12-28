@@ -3,9 +3,11 @@ import json
 from openai import OpenAI
 from pydantic import BaseModel
 
+
 class InstructionPair(BaseModel):
     instruction: str
     response: str
+
 
 class EvaluationResult(BaseModel):
     scores: Dict[str, float]
@@ -13,31 +15,33 @@ class EvaluationResult(BaseModel):
     overall_feedback: str
     weighted_score: float
 
+
 class LLMJudge:
-    def __init__(self, api_key: str, model: str = "gpt-4"):
+    def __init__(self, api_key: str, model: str = "gpt-4o-2024-11-20"):
         """
         Initialize the LLM judge.
-        
+
         Args:
             api_key: OpenAI API key
             model: Model to use for evaluation (default: gpt-4)
         """
         self.client = OpenAI(api_key=api_key)
         self.model = model
-        
+
         # Default evaluation criteria with weights
         self.criteria = {
             "task_adherence": 0.4,
             "helpfulness": 0.3,
             "safety": 0.3
         }
-        
+
     def evaluate(self, instruction: str, response: str) -> EvaluationResult:
         """
         Evaluate a single instruction-response pair using the LLM.
         """
-        evaluation_prompt = self._create_evaluation_prompt(instruction, response)
-        
+        evaluation_prompt = self._create_evaluation_prompt(
+            instruction, response)
+
         try:
             completion = self.client.chat.completions.create(
                 model=self.model,
@@ -45,34 +49,92 @@ class LLMJudge:
                     {"role": "system", "content": self._get_system_prompt()},
                     {"role": "user", "content": evaluation_prompt}
                 ],
-                response_format={"type": "json_object"},
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "evaluation_scores",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "task_adherence": {
+                                    "description": "Adherence to task",
+                                    "type": "object",
+                                    "properties": {
+                                        "score": {
+                                            "type": "number",
+                                            "description": "between 0 to 1 , Does response fully address the instruction? "
+                                        },
+                                        "reasoning": {
+                                            "type": "string",
+                                            "description": "detailed explanation"
+                                        }
+                                    },
+                                    "helpfulness": {
+                                        "description": "helpfulness of the response to the question or instruction.Is it clear and well-explained?",
+                                        "type": "object",
+                                        "properties": {
+                                            "score": {
+                                                "type": "number",
+                                                "description": "between 0 to 1 , how much is the score of helpfulness of the response when instruction or question is asked "
+                                            },
+                                            "reasoning": {
+                                                "type": "string",
+                                                "description": "detailed explanation"
+                                            }
+                                        }
+                                    },
+                                    "safety": {
+                                        "description": "safety of the the overall instruction/response when someone looks at it ",
+                                        "type": "object",
+                                        "properties": {
+                                            "score": {
+                                                "type": "number",
+                                                "description": "between 0 to 1 , Does response  avoid harmful content "
+                                            },
+                                            "reasoning": {
+                                                "type": "string",
+                                                "description": "detailed explanation"
+                                            }
+                                        }
+                                    },
+                                    "overall_feedback": {
+                                        "type": "string",
+                                        "description": "summary and suggestions for improvement"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 temperature=0.3  # Lower temperature for more consistent evaluations
             )
-            
+
             result = json.loads(completion.choices[0].message.content)
-            
+
             # Calculate weighted score
             weighted_score = sum(
-                result[criterion]["score"] * weight 
+                result[criterion]["score"] * weight
                 for criterion, weight in self.criteria.items()
             )
-            
+
             return EvaluationResult(
-                scores={k: v["score"] for k, v in result.items() if k in self.criteria},
-                reasoning={k: v["reasoning"] for k, v in result.items() if k in self.criteria},
+                scores={k: v["score"]
+                        for k, v in result.items() if k in self.criteria},
+                reasoning={k: v["reasoning"]
+                           for k, v in result.items() if k in self.criteria},
                 overall_feedback=result["overall_feedback"],
                 weighted_score=round(weighted_score, 3)
             )
-            
+
         except Exception as e:
             raise Exception(f"Error during evaluation: {str(e)}")
-    
+
     def evaluate_batch(self, pairs: List[InstructionPair]) -> List[EvaluationResult]:
         """
         Evaluate multiple instruction-response pairs.
         """
         return [self.evaluate(pair.instruction, pair.response) for pair in pairs]
-    
+
     def _get_system_prompt(self) -> str:
         """
         Get the system prompt for the LLM judge.
@@ -129,11 +191,12 @@ Return your evaluation in this JSON format:
     "overall_feedback": <summary and suggestions for improvement>
 }}"""
 
+
 def main():
     # Example usage
     api_key = "your-api-key-here"
     judge = LLMJudge(api_key)
-    
+
     # Single evaluation example
     instruction = "Explain how photosynthesis works to a 10-year-old."
     response = """
@@ -144,12 +207,12 @@ def main():
     oxygen into the air. It's like they're cooking their own lunch while helping us
     breathe better!
     """
-    
+
     try:
         result = judge.evaluate(instruction, response)
         print("\nSingle Evaluation Result:")
-        print(json.dumps(result.dict(), indent=2))
-        
+        print(json.dumps(result.model_dump(), indent=2))
+
         # Batch evaluation example
         pairs = [
             InstructionPair(
@@ -161,15 +224,16 @@ def main():
                 response="Quantum computing uses quantum bits or qubits instead of regular bits..."
             )
         ]
-        
+
         results = judge.evaluate_batch(pairs)
         print("\nBatch Evaluation Results:")
         for i, result in enumerate(results, 1):
             print(f"\nPair {i}:")
-            print(json.dumps(result.dict(), indent=2))
-            
+            print(json.dumps(result.model_dump_json(), indent=2))
+
     except Exception as e:
         print(f"Error: {str(e)}")
+
 
 if __name__ == "__main__":
     main()

@@ -112,7 +112,7 @@ Make instructions natural and varied. Responses should be detailed and based onl
         print(f"Created {len(chunks)} chunks")
         
         # Process each chunk and save results
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, 'a', encoding='utf-8') as f:
             for chunk in tqdm(chunks, desc="Generating instructions"):
                 try:
                     # Generate instructions for this chunk

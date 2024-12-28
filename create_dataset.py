@@ -70,7 +70,8 @@ if __name__ == "__main__":
     
 
     # Example 2: Extract specific page range (e.g., pages 2 to 4)
-    print("\nExample 2: Extracting pages 2 to 4")
-    extract_text_from_pdf(pdf_path, from_page=1, to_page=1, output_dir=output_dir)
-    
+    #print("\nExample 2: Extracting pages 2 to 4")
+    #extract_text_from_pdf(pdf_path, from_page=1, to_page=1, output_dir=output_dir)
+    # generate all pages
+    extract_text_from_pdf(pdf_path,  output_dir=output_dir)
     
