@@ -164,6 +164,7 @@ def clean_text(text):
     
     return text
 
+'''
 load_dotenv()
 API_KEY = os.getenv("ANTHROPIC_API_KEY")
 generator = ContextualInstructionGenerator(API_KEY)
@@ -184,3 +185,4 @@ with open('.\\extracted_text\\page_3.txt','r') as file:
     
 generator.process_text(cf1_text, 'instructions_file_new1.jsonl')
 
+'''

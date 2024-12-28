@@ -1,5 +1,6 @@
 import fitz
 import os
+from context_inst_file import clean_text
 
 def extract_text_from_pdf(pdf_path, from_page=None, to_page=None, output_dir=None):
     """
@@ -42,16 +43,18 @@ def extract_text_from_pdf(pdf_path, from_page=None, to_page=None, output_dir=Non
             # Get page text
             text = page.get_text("text")  # Use 'text' mode for better formatting
             
+            # clean the text
+            cleaned_text = clean_text(text)
             # If output directory is specified, save to file
             if output_dir:
                 output_file = os.path.join(output_dir, f"page_{page_num + 1}.txt")
                 with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(text)
-                print(f"Extracted text from page {page_num + 1} saved to {output_file}")
+                    f.write(cleaned_text)
+                print(f"Extracted and cleaned text from page {page_num + 1} saved to {output_file}")
             else:
                 print(f"\nPage {page_num + 1}:")
                 print("=" * 40)
-                print(text)
+                print(cleaned_text)
                 print("=" * 40)
         
         # Print summary
@@ -65,13 +68,10 @@ def extract_text_from_pdf(pdf_path, from_page=None, to_page=None, output_dir=Non
 
 # Example usage
 if __name__ == "__main__":
+
     pdf_path = "india-today.pdf"  # Replace with your PDF path
     output_dir = "extracted_text"  # Optional: specify output directory
     
-
-    # Example 2: Extract specific page range (e.g., pages 2 to 4)
-    #print("\nExample 2: Extracting pages 2 to 4")
-    #extract_text_from_pdf(pdf_path, from_page=1, to_page=1, output_dir=output_dir)
-    # generate all pages
+    # extract and clean text from PDF and generate instructions
     extract_text_from_pdf(pdf_path,  output_dir=output_dir)
     
