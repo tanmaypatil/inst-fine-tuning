@@ -84,15 +84,16 @@ Text: {chunk['text']}
 
 Main topics: {', '.join(chunk['topics'])}
 
-Return the pairs in this exact format (as a Python list of dicts):
-[
-    {{"role": "user", "content": "instruction1"}},
-    {{"role": "assistant", "content": "response1"}},
-    {{"role": "user", "content": "instruction2"}},
-    {{"role": "assistant", "content": "response2"}}
-]
+Return each pair in this exact format, with one pair per line:
+[{{"role": "user", "content": "instruction1"}}, {{"role": "assistant", "content": "response1"}}]
+[{{"role": "user", "content": "instruction2"}}, {{"role": "assistant", "content": "response2"}}]
 
-Make instructions natural and varied. Responses should be detailed and based only on the provided text."""
+Important:
+- Each pair must be a complete list with exactly two dictionaries
+- Use double quotes for strings
+- Each pair must be on its own line
+- Make instructions natural and varied
+- Responses should be detailed and based only on the provided text"""
 
         response = self.client.messages.create(
             model="claude-3-sonnet-20240229",
@@ -100,7 +101,7 @@ Make instructions natural and varied. Responses should be detailed and based onl
             temperature=0.7,
             messages=[{"role": "user", "content": prompt}]
         )
-        
+        print(f"response from api : {response.content[0].text}")
         # Parse and return the response
         return eval(response.content[0].text)
 
